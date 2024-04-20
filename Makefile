@@ -19,8 +19,8 @@ $(TARGET): *.cpp *.hpp
 .PHONY: test clean
 
 test: a.out
-	./a.out
+	mangohud ./a.out
 
 clean:
 	rm -f a.out
-	rm -f *.spv
+	rm -f shaders/*.spv
