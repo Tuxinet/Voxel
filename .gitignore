@@ -33,3 +33,6 @@
 
 # vscode
 .vscode/
+
+# compiled shaders
+*.spv
