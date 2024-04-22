@@ -6,6 +6,7 @@
 
 // std
 #include <memory>
+#include <unordered_map>
 
 namespace lve {
 
@@ -17,13 +18,14 @@ struct TransformComponent {
   // Matrix corresponds to translate * Ry * Rx * Rx * scale transformation
   // Rotation convention uses tait-bryan angles with axis order Y(1), X(2), Z(3)
   glm::mat4 mat4();
-  
+
   glm::mat3 normalMatrix();
 };
 
 class LveGameObject {
 public:
   using id_t = unsigned int;
+  using Map = std::unordered_map<id_t, LveGameObject>;
 
   static LveGameObject createGameObject() {
     static id_t currentId = 0;

@@ -55,7 +55,7 @@ void FirstApp::run() {
   }
 
   auto globalSetLayout = LveDescriptorSetLayout::Builder(lveDevice)
-                             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_VERTEX_BIT)
+                             .addBinding(0, VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, VK_SHADER_STAGE_ALL_GRAPHICS)
                              .build();
 
   std::vector<VkDescriptorSet> globaleDescriptorSets(LveSwapChain::MAX_FRAMES_IN_FLIGHT);
@@ -65,7 +65,8 @@ void FirstApp::run() {
     LveDescriptorWriter(*globalSetLayout, *globalPool).writeBuffer(0, &bufferInfo).build(globaleDescriptorSets[i]);
   }
 
-  SimpleRenderSystem simpleRenderSystem(lveDevice, lveRenderer.getSwapChainRenderPass(), globalSetLayout->getDescriptorSetLayout());
+  SimpleRenderSystem simpleRenderSystem(lveDevice, lveRenderer.getSwapChainRenderPass(),
+                                        globalSetLayout->getDescriptorSetLayout());
 
   LveCamera camera{};
   camera.setViewTarget(glm::vec3(-1.f, -2.f, 2.f), glm::vec3(0.f, 0.f, 2.5f));
@@ -91,7 +92,7 @@ void FirstApp::run() {
 
     if (auto commandBuffer = lveRenderer.beginFrame()) {
       int frameIndex = lveRenderer.getFrameIndex();
-      FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera, globaleDescriptorSets[frameIndex]};
+      FrameInfo frameInfo{frameIndex, frameTime, commandBuffer, camera, globaleDescriptorSets[frameIndex], gameObjects};
       // update
       GlobalUbo ubo{};
       ubo.projectionView = camera.getProjection() * camera.getView();
@@ -100,7 +101,7 @@ void FirstApp::run() {
 
       // render
       lveRenderer.beginSwapChainRenderPass(commandBuffer);
-      simpleRenderSystem.renderGameObjects(frameInfo, gameObjects);
+      simpleRenderSystem.renderGameObjects(frameInfo);
       lveRenderer.endSwapChainRenderPass(commandBuffer);
       lveRenderer.endFrame();
     }
@@ -110,17 +111,24 @@ void FirstApp::run() {
 }
 
 void FirstApp::loadGameObjects() {
-  std::shared_ptr<LveModel> lveModel = LveModel::createModelFromFile(lveDevice, "models/cube.obj");
+  std::shared_ptr<LveModel> cubeModel = LveModel::createModelFromFile(lveDevice, "models/cube.obj");
+  std::shared_ptr<LveModel> floorModel = LveModel::createModelFromFile(lveDevice, "models/quad.obj");
+
+  auto floor = LveGameObject::createGameObject();
+  floor.model = floorModel;
+  floor.transform.translation = {0.5f, 2.2f, 0.5f};
+  floor.transform.scale = {3.f, 1.5f, 3.5f};
+  gameObjects.emplace(floor.getId(), std::move(floor));
 
   for (int x = 0; x < 10; x++) {
     for (int y = 0; y < 10; y++) {
       for (int z = 0; z < 20; z++) {
         auto cube = LveGameObject::createGameObject();
-        cube.model = lveModel;
+        cube.model = cubeModel;
         cube.transform.translation = {-2.5f + x * 1.2f, 1.5f + y * 1.2f, 2.5f + z * 1.2f};
         cube.transform.scale = {.5f, .5f, .5f};
 
-        gameObjects.push_back(std::move(cube));
+        gameObjects.emplace(cube.getId(), std::move(cube));
       }
     }
   }
