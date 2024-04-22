@@ -112,10 +112,11 @@ void FirstApp::run() {
 
 void FirstApp::loadGameObjects() {
   std::shared_ptr<LveModel> cubeModel = LveModel::createModelFromFile(lveDevice, "models/cube.obj");
+  std::shared_ptr<LveModel> cubeColorModel = LveModel::createModelFromFile(lveDevice, "models/colored_cube.obj");
   std::shared_ptr<LveModel> floorModel = LveModel::createModelFromFile(lveDevice, "models/quad.obj");
 
   auto floor = LveGameObject::createGameObject();
-  floor.model = floorModel;
+  floor.model = nullptr;
   floor.transform.translation = {0.5f, 2.2f, 0.5f};
   floor.transform.scale = {3.f, 1.5f, 3.5f};
   gameObjects.emplace(floor.getId(), std::move(floor));
@@ -124,7 +125,12 @@ void FirstApp::loadGameObjects() {
     for (int y = 0; y < 10; y++) {
       for (int z = 0; z < 20; z++) {
         auto cube = LveGameObject::createGameObject();
-        cube.model = cubeModel;
+        
+        if (z % 2)
+          cube.model = cubeModel;
+        else
+          cube.model = cubeColorModel;
+
         cube.transform.translation = {-2.5f + x * 1.2f, 1.5f + y * 1.2f, 2.5f + z * 1.2f};
         cube.transform.scale = {.5f, .5f, .5f};
 

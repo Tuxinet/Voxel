@@ -39,3 +39,6 @@
 
 # Build
 build/
+
+# clangd
+.cache/
