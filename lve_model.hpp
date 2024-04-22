@@ -1,6 +1,7 @@
 #pragma once
 
 #include "lve_device.hpp"
+#include "lve_buffer.hpp"
 
 // libs
 #define GLM_FORCE_RADIANS
@@ -29,7 +30,7 @@ public:
     bool operator==(const Vertex &other) const {
       return position == other.position && color == other.color &&
              normal == other.normal && uv == other.uv;
-    };
+    }
   };
 
   struct Builder {
@@ -57,13 +58,11 @@ private:
 
   LveDevice &lveDevice;
 
-  VkBuffer vertexBuffer;
-  VkDeviceMemory vertexBufferMemory;
+  std::unique_ptr<LveBuffer> vertexBuffer;
   uint32_t vertexCount;
 
   bool hasIndexBuffer = false;
-  VkBuffer indexBuffer;
-  VkDeviceMemory indexBufferMemory;
+  std::unique_ptr<LveBuffer> indexBuffer;
   uint32_t indexCount;
 };
 } // namespace lve
