@@ -6,17 +6,18 @@
 
 // libs
 #define TINYOBJLOADER_IMPLEMENTATION
-#include "libs/tiny_obj_loader.h"
+#include "tiny_obj_loader.h"
 #define GLM_ENABLE_EXPERIMENTAL
 #include <glm/gtx/hash.hpp>
 
 // std
 #include <cassert>
-#include <cstdint>
 #include <cstring>
-#include <iostream>
-#include <memory>
 #include <unordered_map>
+
+#ifndef ENGINE_DIR
+#define ENGINE_DIR "../"
+#endif
 
 namespace std {
 template <> struct hash<lve::LveModel::Vertex> {
@@ -41,7 +42,7 @@ LveModel::~LveModel() {}
 std::unique_ptr<LveModel>
 LveModel::createModelFromFile(LveDevice &device, const std::string filepath) {
   Builder builder{};
-  builder.loadModel(filepath);
+  builder.loadModel(ENGINE_DIR + filepath);
 
   return std::make_unique<LveModel>(device, builder);
 }

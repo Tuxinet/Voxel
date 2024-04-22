@@ -36,3 +36,6 @@
 
 # compiled shaders
 *.spv
+
+# Build
+build/
