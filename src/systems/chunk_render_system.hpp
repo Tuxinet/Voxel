@@ -21,7 +21,7 @@ public:
   ChunkRenderSystem(const ChunkRenderSystem &) = delete;
   ChunkRenderSystem &operator=(const ChunkRenderSystem &) = delete;
 
-  void renderGameObjects(FrameInfo &frameInfo);
+  void renderChunks(FrameInfo &frameInfo);
 
 private:
   void createPipelineLayout(VkDescriptorSetLayout globalSetLayout);

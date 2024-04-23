@@ -109,8 +109,8 @@ void FirstApp::run() {
       // order here matters
 
       simpleRenderSystem.renderGameObjects(frameInfo);
-      
-      chunkRenderSystem.renderGameObjects(frameInfo);
+
+      chunkRenderSystem.renderChunks(frameInfo);
 
       pointLightSystem.render(frameInfo);
 
@@ -133,23 +133,27 @@ void FirstApp::loadChunks() {
   floor.transform.translation = {0.5f, 2.2f, 0.5f};
   floor.transform.scale = {3.f, 1.5f, 3.5f};
 
-  LveChunk c = LveChunk::createChunk();
+  LveChunk c = LveChunk::createChunk(lveDevice);
 
   for (int x = 0; x < 16; x++) {
     for (int y = 0; y < 16; y++) {
       for (int z = 0; z < 256; z++) {
         auto cube = LveGameObject::createGameObject();
 
-        cube.model = cubeColorModel;
+        if (x % 2)
+          cube.model = cubeColorModel;
+        else
+          cube.model = cubeModel;
 
-        cube.transform.translation = {x * 1.f, y * 1.f, z * 1.f};
-        cube.transform.scale = {.5f, .5f, .5f};
+        cube.transform.translation = {x * 2.2f, y * 2.2f, z * 2.2f};
+        cube.transform.scale = {1.f, 1.f, 1.f};
 
         c.addBlock(cube);
       }
     }
   }
 
+  std::cout << "Generating chunk mesh..." << std::endl;
   c.generateMesh();
 
   chunks.emplace(c.getId(), std::move(c));

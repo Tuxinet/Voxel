@@ -60,7 +60,7 @@ void ChunkRenderSystem::createPipeline(VkRenderPass renderPass) {
                                               pipelineConfig);
 }
 
-void ChunkRenderSystem::renderGameObjects(FrameInfo &frameInfo) {
+void ChunkRenderSystem::renderChunks(FrameInfo &frameInfo) {
   lvePipeline->bind(frameInfo.commandBuffer);
 
   vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
@@ -69,21 +69,15 @@ void ChunkRenderSystem::renderGameObjects(FrameInfo &frameInfo) {
   for (auto &kv : frameInfo.chunks) {
     auto &c = kv.second;
 
-    for (auto &kv2 : c.blocks) {
-      auto &obj = kv2.second;
-      if (obj.model == nullptr)
-        continue;
+    SimplePushConstantData push{};
+    push.modelMatrix = c.transform.mat4();
+    push.normalMatrix = c.transform.normalMatrix();
 
-      SimplePushConstantData push{};
-      push.modelMatrix = obj.transform.mat4();
-      push.normalMatrix = obj.transform.normalMatrix();
+    vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                        0, sizeof(SimplePushConstantData), &push);
 
-      vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                         0, sizeof(SimplePushConstantData), &push);
-
-      obj.model->bind(frameInfo.commandBuffer);
-      obj.model->draw(frameInfo.commandBuffer);
-    }
+    c.model->bind(frameInfo.commandBuffer);
+    c.model->draw(frameInfo.commandBuffer);
   }
 }
 } // namespace lve

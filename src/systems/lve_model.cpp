@@ -2,6 +2,7 @@
 
 #include "lve_buffer.hpp"
 #include "lve_utils.hpp"
+#include <memory>
 #include <vulkan/vulkan_core.h>
 
 // libs
@@ -13,6 +14,7 @@
 // std
 #include <cassert>
 #include <cstring>
+#include <iostream>
 #include <unordered_map>
 
 #ifndef ENGINE_DIR
@@ -30,9 +32,9 @@ template <> struct hash<lve::LveModel::Vertex> {
 } // namespace std
 
 namespace lve {
-LveModel::LveModel(LveDevice &device, const LveModel::Builder &builder) : lveDevice{device} {
-  createVertexBuffers(builder.vertices);
-  createIndexBuffers(builder.indices);
+LveModel::LveModel(LveDevice &device, const LveModel::Builder &builder) : lveDevice{device}, builder{builder} {
+  createVertexBuffers(builder.m_vertices);
+  createIndexBuffers(builder.m_indices);
 }
 
 LveModel::~LveModel() {}
@@ -40,6 +42,21 @@ LveModel::~LveModel() {}
 std::unique_ptr<LveModel> LveModel::createModelFromFile(LveDevice &device, const std::string filepath) {
   Builder builder{};
   builder.loadModel(ENGINE_DIR + filepath);
+
+  return std::make_unique<LveModel>(device, builder);
+}
+
+std::unique_ptr<LveModel> LveModel::createModelFromVertices(LveDevice &device, const std::vector<Vertex> &vertices) {
+  Builder builder{};
+  builder.loadVertices(vertices);
+
+  return std::make_unique<LveModel>(device, builder);
+}
+
+std::unique_ptr<LveModel> LveModel::createModelFromBuffers(LveDevice &device, const std::vector<Vertex> &vertices,
+                                                           const std::vector<uint32_t> &indices) {
+  Builder builder{};
+  builder.loadBuffers(vertices, indices);
 
   return std::make_unique<LveModel>(device, builder);
 }
@@ -131,6 +148,35 @@ std::vector<VkVertexInputAttributeDescription> LveModel::Vertex::getAttributeDes
   return attributeDescriptions;
 }
 
+void LveModel::Builder::loadVertices(const std::vector<Vertex> &vertices) {
+  m_vertices.clear();
+  m_indices.clear();
+
+  std::unordered_map<Vertex, uint32_t> uniqueVertices{};
+
+  for (auto &vertex : vertices) {
+    if (uniqueVertices.count(vertex) == 0) {
+      uniqueVertices[vertex] = static_cast<uint32_t>(m_vertices.size());
+      m_vertices.push_back(vertex);
+    }
+    m_indices.push_back(uniqueVertices[vertex]);
+  }
+}
+
+void LveModel::Builder::loadBuffers(const std::vector<Vertex> &vertices, const std::vector<uint32_t> &indices) {
+  // m_vertices.clear();
+  // m_indices.clear();
+
+  // TODO: Check if this is the right way to copy the vectors
+  // (https://stackoverflow.com/questions/644673/is-it-more-efficient-to-copy-a-vector-by-reserving-and-copying-or-by-creating-a)
+
+  m_vertices = vertices;
+  m_indices = indices;
+}
+
+// For now we only combine the vertices, and don't care about everything else
+void LveModel::Builder::combineModels(std::vector<std::shared_ptr<LveModel>> &models) {}
+
 void LveModel::Builder::loadModel(const std::string &filepath) {
   tinyobj::attrib_t attrib;
   std::vector<tinyobj::shape_t> shapes;
@@ -141,8 +187,8 @@ void LveModel::Builder::loadModel(const std::string &filepath) {
     throw std::runtime_error(warn + err);
   }
 
-  vertices.clear();
-  indices.clear();
+  m_vertices.clear();
+  m_indices.clear();
 
   std::unordered_map<Vertex, uint32_t> uniqueVertices{};
 
@@ -180,10 +226,10 @@ void LveModel::Builder::loadModel(const std::string &filepath) {
       }
 
       if (uniqueVertices.count(vertex) == 0) {
-        uniqueVertices[vertex] = static_cast<uint32_t>(vertices.size());
-        vertices.push_back(vertex);
+        uniqueVertices[vertex] = static_cast<uint32_t>(m_vertices.size());
+        m_vertices.push_back(vertex);
       }
-      indices.push_back(uniqueVertices[vertex]);
+      m_indices.push_back(uniqueVertices[vertex]);
     }
   }
 }
