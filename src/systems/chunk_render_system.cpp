@@ -1,4 +1,4 @@
-#include "simple_render_system.hpp"
+#include "chunk_render_system.hpp"
 #include <cstddef>
 #include <vulkan/vulkan_core.h>
 
@@ -20,15 +20,15 @@ struct SimplePushConstantData {
   glm::mat4 normalMatrix{1.f};
 };
 
-SimpleRenderSystem::SimpleRenderSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
+ChunkRenderSystem::ChunkRenderSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
     : lveDevice{device} {
   createPipelineLayout(globalSetLayout);
   createPipeline(renderPass);
 }
 
-SimpleRenderSystem::~SimpleRenderSystem() { vkDestroyPipelineLayout(lveDevice.device(), pipelineLayout, nullptr); }
+ChunkRenderSystem::~ChunkRenderSystem() { vkDestroyPipelineLayout(lveDevice.device(), pipelineLayout, nullptr); }
 
-void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
+void ChunkRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLayout) {
   VkPushConstantRange pushConstantRange{};
   pushConstantRange.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
   pushConstantRange.offset = 0;
@@ -48,7 +48,7 @@ void SimpleRenderSystem::createPipelineLayout(VkDescriptorSetLayout globalSetLay
   }
 }
 
-void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
+void ChunkRenderSystem::createPipeline(VkRenderPass renderPass) {
   assert(pipelineLayout != nullptr && "Cannot create pipeline before pipeline layout");
 
   PipelineConfigInfo pipelineConfig{};
@@ -60,27 +60,30 @@ void SimpleRenderSystem::createPipeline(VkRenderPass renderPass) {
                                               pipelineConfig);
 }
 
-void SimpleRenderSystem::renderGameObjects(FrameInfo &frameInfo) {
+void ChunkRenderSystem::renderGameObjects(FrameInfo &frameInfo) {
   lvePipeline->bind(frameInfo.commandBuffer);
 
   vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
                           &frameInfo.globaleDescriptorSet, 0, nullptr);
 
-  for (auto &kv : frameInfo.gameObjects) {
-    auto &obj = kv.second;
+  for (auto &kv : frameInfo.chunks) {
+    auto &c = kv.second;
 
-    if (obj.model == nullptr)
-      continue;
+    for (auto &kv2 : c.blocks) {
+      auto &obj = kv2.second;
+      if (obj.model == nullptr)
+        continue;
 
-    SimplePushConstantData push{};
-    push.modelMatrix = obj.transform.mat4();
-    push.normalMatrix = obj.transform.normalMatrix();
+      SimplePushConstantData push{};
+      push.modelMatrix = obj.transform.mat4();
+      push.normalMatrix = obj.transform.normalMatrix();
 
-    vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
-                       sizeof(SimplePushConstantData), &push);
+      vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
+                         0, sizeof(SimplePushConstantData), &push);
 
-    obj.model->bind(frameInfo.commandBuffer);
-    obj.model->draw(frameInfo.commandBuffer);
+      obj.model->bind(frameInfo.commandBuffer);
+      obj.model->draw(frameInfo.commandBuffer);
+    }
   }
 }
 } // namespace lve

@@ -2,6 +2,7 @@
 
 #include "lve_camera.hpp"
 #include "lve_game_object.hpp"
+#include "lve_chunk.hpp"
 // lib
 #include <vulkan/vulkan.h>
 
@@ -18,7 +19,7 @@ struct GlobalUbo {
   glm::mat4 projection{1.f};
   glm::mat4 view{1.f};
   glm::mat4 inverseView{1.f};
-  glm::vec4 ambientColor{1.f, 1.f, 1.f, .0f}; // w is intensity
+  glm::vec4 ambientColor{1.f, 1.f, 1.f, .05f}; // w is intensity
   PointLight pointLights[MAX_LIGHTS];
   int numLights;
 };
@@ -30,5 +31,6 @@ struct FrameInfo {
   LveCamera &camera;
   VkDescriptorSet globaleDescriptorSet;
   LveGameObject::Map &gameObjects;
+  LveChunk::Map &chunks;
 };
 } // namespace lve

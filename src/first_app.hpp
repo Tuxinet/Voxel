@@ -1,11 +1,12 @@
 #pragma once
 
-#include "lve_descriptors.hpp"
-#include "lve_device.hpp"
-#include "lve_game_object.hpp"
-#include "lve_model.hpp"
-#include "lve_renderer.hpp"
-#include "lve_window.hpp"
+#include "systems/lve_chunk.hpp"
+#include "systems/lve_descriptors.hpp"
+#include "systems/lve_device.hpp"
+#include "systems/lve_game_object.hpp"
+#include "systems/lve_model.hpp"
+#include "systems/lve_renderer.hpp"
+#include "systems/lve_window.hpp"
 
 // std
 #include <memory>
@@ -26,7 +27,7 @@ public:
   void run();
 
 private:
-  void loadGameObjects();
+  void loadChunks();
 
   LveWindow lveWindow{WIDTH, HEIGHT, "Hello Vulkan!"};
   LveDevice lveDevice{lveWindow};
@@ -35,5 +36,6 @@ private:
   // note: order of declarations matters
   std::unique_ptr<LveDescriptorPool> globalPool{};
   LveGameObject::Map gameObjects;
+  LveChunk::Map chunks;
 };
 } // namespace lve

@@ -13,13 +13,13 @@
 #include <vulkan/vulkan_core.h>
 
 namespace lve {
-class SimpleRenderSystem {
+class ChunkRenderSystem {
 public:
-  SimpleRenderSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
-  ~SimpleRenderSystem();
+  ChunkRenderSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout);
+  ~ChunkRenderSystem();
 
-  SimpleRenderSystem(const SimpleRenderSystem &) = delete;
-  SimpleRenderSystem &operator=(const SimpleRenderSystem &) = delete;
+  ChunkRenderSystem(const ChunkRenderSystem &) = delete;
+  ChunkRenderSystem &operator=(const ChunkRenderSystem &) = delete;
 
   void renderGameObjects(FrameInfo &frameInfo);
 
