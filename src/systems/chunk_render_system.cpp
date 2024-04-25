@@ -66,18 +66,23 @@ void ChunkRenderSystem::renderChunks(FrameInfo &frameInfo) {
   vkCmdBindDescriptorSets(frameInfo.commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1,
                           &frameInfo.globaleDescriptorSet, 0, nullptr);
 
-  for (auto &kv : frameInfo.chunks) {
-    auto &c = kv.second;
+  for (auto chunk : frameInfo.chunks) {
 
     SimplePushConstantData push{};
-    push.modelMatrix = c.transform.mat4();
-    push.normalMatrix = c.transform.normalMatrix();
+    push.modelMatrix = chunk->transform.mat4();
+    push.normalMatrix = chunk->transform.normalMatrix();
 
-    vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT,
-                        0, sizeof(SimplePushConstantData), &push);
+    vkCmdPushConstants(frameInfo.commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0,
+                       sizeof(SimplePushConstantData), &push);
 
-    c.model->bind(frameInfo.commandBuffer);
-    c.model->draw(frameInfo.commandBuffer);
+    // This should probably NOT be done here, but oh well...
+    // TODO: Move mesh-generation to somewhere else (tm)
+    if (chunk->model == nullptr) {
+      chunk->generateMesh();
+    }
+
+    chunk->model->bind(frameInfo.commandBuffer);
+    chunk->model->draw(frameInfo.commandBuffer);
   }
 }
 } // namespace lve

@@ -88,12 +88,12 @@ void FirstApp::run() {
 
     float aspect = lveRenderer.getAspectRatio();
     // camera.setOrthographicProjection(-aspect, aspect, -1, 1, -1, 1);
-    camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 100.f);
+    camera.setPerspectiveProjection(glm::radians(50.f), aspect, 0.1f, 10000.f);
 
     if (auto commandBuffer = lveRenderer.beginFrame()) {
       int frameIndex = lveRenderer.getFrameIndex();
       FrameInfo frameInfo{frameIndex,  frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],
-                          gameObjects, chunks};
+                          gameObjects, world.getChunksAroundPosition(0, 0, 1)};
       // update
       GlobalUbo ubo{};
       ubo.projection = camera.getProjection();
@@ -133,30 +133,16 @@ void FirstApp::loadChunks() {
   floor.transform.translation = {0.5f, 2.2f, 0.5f};
   floor.transform.scale = {3.f, 1.5f, 3.5f};
 
-  LveChunk c = LveChunk::createChunk(lveDevice);
+  std::cout << "Generating world..." << std::endl;
+  auto chunkStartTime = std::chrono::high_resolution_clock::now();
+  
+  
 
-  for (int x = 0; x < 16; x++) {
-    for (int y = 0; y < 16; y++) {
-      for (int z = 0; z < 256; z++) {
-        auto cube = LveGameObject::createGameObject();
+  auto chunkEndTime = std::chrono::high_resolution_clock::now();
+  world.getChunksAroundPosition(0, 0, 8);
+  float chunkGenTime = std::chrono::duration<float, std::chrono::seconds::period>(chunkEndTime - chunkStartTime).count();
 
-        if (x % 2)
-          cube.model = cubeColorModel;
-        else
-          cube.model = cubeModel;
-
-        cube.transform.translation = {x * 2.2f, y * 2.2f, z * 2.2f};
-        cube.transform.scale = {1.f, 1.f, 1.f};
-
-        c.addBlock(cube);
-      }
-    }
-  }
-
-  std::cout << "Generating chunk mesh..." << std::endl;
-  c.generateMesh();
-
-  chunks.emplace(c.getId(), std::move(c));
+  std::cout << "World generation took " << chunkGenTime << " seconds" << std::endl;
 
   std::cout << "Number of gameobjects: " << gameObjects.size() << std::endl;
 }

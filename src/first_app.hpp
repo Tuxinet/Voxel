@@ -7,6 +7,7 @@
 #include "systems/lve_model.hpp"
 #include "systems/lve_renderer.hpp"
 #include "systems/lve_window.hpp"
+#include "systems/lve_world.hpp"
 
 // std
 #include <memory>
@@ -36,6 +37,6 @@ private:
   // note: order of declarations matters
   std::unique_ptr<LveDescriptorPool> globalPool{};
   LveGameObject::Map gameObjects;
-  LveChunk::Map chunks;
+  LveWorld world{lveDevice};
 };
 } // namespace lve

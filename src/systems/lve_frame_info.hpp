@@ -31,6 +31,6 @@ struct FrameInfo {
   LveCamera &camera;
   VkDescriptorSet globaleDescriptorSet;
   LveGameObject::Map &gameObjects;
-  LveChunk::Map &chunks;
+  std::vector<std::shared_ptr<LveChunk>> chunks;
 };
 } // namespace lve
