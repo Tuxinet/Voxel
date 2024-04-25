@@ -13,7 +13,7 @@
 
 #define CHUNK_SIZE_X 16
 #define CHUNK_SIZE_Y 16
-#define CHUNK_SIZE_Z 3
+#define CHUNK_SIZE_Z 256
 
 namespace lve {
 
@@ -44,7 +44,7 @@ private:
   LveChunk(int32_t chunk_x, int32_t chunk_y, id_t objId, LveDevice &device)
       : id{objId}, lveDevice(device), m_pos_x{chunk_x}, m_pos_y{chunk_y} {
         transform.translation.x = chunk_x * CHUNK_SIZE_X;
-        transform.translation.y = chunk_y * CHUNK_SIZE_Y;
+        transform.translation.z = chunk_y * CHUNK_SIZE_Y;
       };
 
   id_t id;
