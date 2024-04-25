@@ -136,7 +136,7 @@ void FirstApp::loadChunks() {
   std::cout << "Generating world..." << std::endl;
   auto chunkStartTime = std::chrono::high_resolution_clock::now();
   
-  world.getChunksAroundPosition(0, 0, 8);
+  world.getChunksAroundPosition(0, 0, 100);
 
   auto chunkEndTime = std::chrono::high_resolution_clock::now();
   float chunkGenTime = std::chrono::duration<float, std::chrono::seconds::period>(chunkEndTime - chunkStartTime).count();

@@ -43,8 +43,8 @@ private:
   bool dirtyMesh{false};
   LveChunk(int32_t chunk_x, int32_t chunk_y, id_t objId, LveDevice &device)
       : id{objId}, lveDevice(device), m_pos_x{chunk_x}, m_pos_y{chunk_y} {
-        transform.translation.x = chunk_x * CHUNK_SIZE_X;
-        transform.translation.z = chunk_y * CHUNK_SIZE_Y;
+        transform.translation.x = chunk_x * CHUNK_SIZE_X * 1.2f;
+        transform.translation.z = chunk_y * CHUNK_SIZE_Y * 1.2f;
       };
 
   id_t id;
