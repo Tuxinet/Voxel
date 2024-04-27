@@ -6,6 +6,7 @@
 #include "lve_frame_info.hpp"
 #include "lve_game_object.hpp"
 #include "lve_pipeline.hpp"
+#include "lve_thread_pool.h"
 
 // std
 #include <memory>
@@ -31,5 +32,7 @@ private:
 
   std::unique_ptr<LvePipeline> lvePipeline;
   VkPipelineLayout pipelineLayout;
+
+  LveThreadPool pool;
 };
 } // namespace lve

@@ -11,6 +11,7 @@
 #include "systems/simple_render_system.hpp"
 #include <glm/geometric.hpp>
 #include <memory>
+#include <mutex>
 #include <vulkan/vulkan_core.h>
 
 // libs
@@ -78,6 +79,7 @@ void FirstApp::run() {
 
   while (!lveWindow.shouldClose()) {
     glfwPollEvents();
+    std::lock_guard<std::mutex> guard(LveModel::m_createBuffersMutex);
 
     auto newTime = std::chrono::high_resolution_clock::now();
     float frameTime = std::chrono::duration<float, std::chrono::seconds::period>(newTime - currentTime).count();
@@ -92,8 +94,15 @@ void FirstApp::run() {
 
     if (auto commandBuffer = lveRenderer.beginFrame()) {
       int frameIndex = lveRenderer.getFrameIndex();
-      FrameInfo frameInfo{frameIndex,  frameTime, commandBuffer, camera, globalDescriptorSets[frameIndex],
-                          gameObjects, world.getChunksAroundPosition(0, 0, 1)};
+      FrameInfo frameInfo{frameIndex,
+                          frameTime,
+                          commandBuffer,
+                          camera,
+                          globalDescriptorSets[frameIndex],
+                          gameObjects,
+                          world.getChunksAroundPosition(LveChunk::getChunkPositionX(camera.getPosition().x),
+                                                        LveChunk::getChunkPositionZ(camera.getPosition().z), 20)};
+
       // update
       GlobalUbo ubo{};
       ubo.projection = camera.getProjection();
@@ -135,8 +144,13 @@ void FirstApp::loadChunks() {
 
   std::cout << "Generating world..." << std::endl;
   auto chunkStartTime = std::chrono::high_resolution_clock::now();
-  
-  world.getChunksAroundPosition(0, 0, 100);
+
+  auto chunks = world.getChunksAroundPosition(0, 0, 1);
+
+  std::cout << "Generating chunk meshes..." << std::endl;
+  for (auto chunk : chunks) {
+    chunk->generateMesh();
+  }
 
   auto chunkEndTime = std::chrono::high_resolution_clock::now();
   float chunkGenTime = std::chrono::duration<float, std::chrono::seconds::period>(chunkEndTime - chunkStartTime).count();

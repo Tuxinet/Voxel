@@ -12,6 +12,7 @@
 #include <array>
 #include <iostream>
 #include <stdexcept>
+#include <thread>
 
 namespace lve {
 
@@ -21,7 +22,7 @@ struct SimplePushConstantData {
 };
 
 ChunkRenderSystem::ChunkRenderSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-    : lveDevice{device} {
+    : lveDevice{device}, pool(3) {
   createPipelineLayout(globalSetLayout);
   createPipeline(renderPass);
 }
@@ -77,8 +78,15 @@ void ChunkRenderSystem::renderChunks(FrameInfo &frameInfo) {
 
     // This should probably NOT be done here, but oh well...
     // TODO: Move mesh-generation to somewhere else (tm)
-    if (chunk->model == nullptr) {
-      chunk->generateMesh();
+    if (chunk->hasStartedThread) continue;
+
+    if (chunk->dirtyMesh) {
+      chunk->hasStartedThread = true;
+      pool.enqueue([chunk]{
+        chunk->generateMesh();
+      });
+
+      continue;
     }
 
     chunk->model->bind(frameInfo.commandBuffer);

@@ -15,6 +15,8 @@ layout(set = 0, binding = 0) uniform GlobalUbo {
   mat4 projection;
   mat4 view;
   mat4 invView;
+  vec4 sunPosition;
+  vec4 sunColor;
   vec4 ambientLightColor;
   PointLight pointLights[10];
   int numLights;
@@ -57,6 +59,14 @@ void main() {
     blinnTerm = pow(blinnTerm, 128.0);
     specularLight += light.color.xyz * attenuation * blinnTerm;
   }
+
+  // Now do this shit for the sun
+  vec3 directionToSun = normalize(ubo.sunPosition.xyz);
+  float cosAngIncidence = max(dot(surfaceNormal, directionToSun), 0);
+  vec3 intensity = ubo.sunColor.xyz * ubo.sunColor.w;
+
+  diffuseLight += intensity * cosAngIncidence;
+  
 
   outColor = vec4(diffuseLight * fragColor + specularLight * fragColor, 1.0);
 }

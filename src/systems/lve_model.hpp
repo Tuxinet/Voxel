@@ -11,6 +11,7 @@
 // std
 #include <memory>
 #include <vector>
+#include <mutex>
 
 namespace lve {
 class LveModel {
@@ -56,6 +57,7 @@ public:
 
   const std::vector<Vertex> &getVertices() const { return builder.m_vertices; }
   const std::vector<uint32_t> &getIndices() const { return builder.m_indices; }
+  inline static std::mutex m_createBuffersMutex;
 
 private:
   Builder builder;
@@ -71,5 +73,6 @@ private:
   bool hasIndexBuffer = false;
   std::unique_ptr<LveBuffer> indexBuffer;
   uint32_t indexCount;
+
 };
 } // namespace lve

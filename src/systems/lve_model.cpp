@@ -3,6 +3,7 @@
 #include "lve_buffer.hpp"
 #include "lve_utils.hpp"
 #include <memory>
+#include <mutex>
 #include <vulkan/vulkan_core.h>
 
 // libs
@@ -33,6 +34,7 @@ template <> struct hash<lve::LveModel::Vertex> {
 
 namespace lve {
 LveModel::LveModel(LveDevice &device, const LveModel::Builder &builder) : lveDevice{device}, builder{builder} {
+  std::lock_guard<std::mutex> guard(m_createBuffersMutex);
   createVertexBuffers(builder.m_vertices);
   createIndexBuffers(builder.m_indices);
 }
