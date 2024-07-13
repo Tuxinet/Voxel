@@ -3,7 +3,12 @@
 #include "lve_model.hpp"
 
 namespace lve {
-enum BlockState { AIR, STONE, DIRT };
+enum BlockState { AIR, WATER, STONE, DIRT };
+
+struct BlockInfo {
+  BlockState state;
+  bool transparent = false;
+};
 
 class Block {
 public:

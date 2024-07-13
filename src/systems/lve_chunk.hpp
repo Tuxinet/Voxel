@@ -12,9 +12,10 @@
 #include <unordered_map>
 #include <vector>
 #include <thread>
+#include <map>
 
-#define CHUNK_SIZE_X 16
-#define CHUNK_SIZE_Z 16
+#define CHUNK_SIZE_X 32
+#define CHUNK_SIZE_Z 32
 #define CHUNK_SIZE_Y 256
 
 namespace lve {
@@ -30,9 +31,9 @@ public:
   }
 
   void addBlock(LveGameObject &block);
-  void startGenerateMesh();
-  void generateMesh();
-  BlockState getBlock(int32_t x, int32_t y, int32_t z);
+  void generateSolidMesh();
+  void generateTransparentMesh();
+  BlockInfo getBlock(int32_t x, int32_t y, int32_t z);
 
   static std::pair<uint32_t, uint32_t> getChunkPosition(float x, float z) {
     int chunk_x = static_cast<int>(std::floor(static_cast<double>(x) / CHUNK_SIZE_X));
@@ -49,7 +50,8 @@ public:
 
   LveGameObject::Map blocks;
   TransformComponent transform{};
-  std::shared_ptr<LveModel> model{};
+  std::shared_ptr<LveModel> solidModel{};
+  std::shared_ptr<LveModel> transparentModel{};
   const int32_t m_pos_x;
   const int32_t m_pos_z;
 
@@ -63,13 +65,21 @@ private:
     transform.translation.x = chunk_x * CHUNK_SIZE_X;
     transform.translation.z = chunk_z * CHUNK_SIZE_Z;
 
-    noise.SetNoiseType(FastNoiseLite::NoiseType_Perlin);
-    noise.SetSeed(1);
+    noise2D.SetNoiseType(FastNoiseLite::NoiseType_OpenSimplex2);
+    noise2D.SetFractalType(FastNoiseLite::FractalType_FBm);
+    noise2D.SetFractalOctaves(5);
+    noise2D.SetFractalLacunarity(2.06f);
+    noise2D.SetFractalGain(0.320f);
+    noise2D.SetSeed(1);
+
+    //noise3D.SetNoiseType(FastNoiseLite::)
   };
 
   id_t id;
   LveDevice &lveDevice;
 
-  FastNoiseLite noise{};
+  FastNoiseLite noise2D{};
+  FastNoiseLite noise3D{};
+  std::map<std::pair<int, int>, float> noiseValues{};
 };
 } // namespace lve

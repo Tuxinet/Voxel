@@ -4,7 +4,7 @@
 #include <iostream>
 
 namespace lve {
-BlockState LveWorld::getBlock(int32_t x, int32_t y, int32_t z) {
+BlockInfo LveWorld::getBlock(int32_t x, int32_t y, int32_t z) {
   // First find the chunk-index
   auto chunk_x = x / CHUNK_SIZE_X;
   auto chunk_z = z / CHUNK_SIZE_Y;

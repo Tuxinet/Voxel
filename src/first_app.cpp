@@ -101,7 +101,7 @@ void FirstApp::run() {
                           globalDescriptorSets[frameIndex],
                           gameObjects,
                           world.getChunksAroundPosition(LveChunk::getChunkPositionX(camera.getPosition().x),
-                                                        LveChunk::getChunkPositionZ(camera.getPosition().z), 20)};
+                                                        LveChunk::getChunkPositionZ(camera.getPosition().z), 15)};
 
       // update
       GlobalUbo ubo{};
@@ -145,11 +145,11 @@ void FirstApp::loadChunks() {
   std::cout << "Generating world..." << std::endl;
   auto chunkStartTime = std::chrono::high_resolution_clock::now();
 
-  auto chunks = world.getChunksAroundPosition(0, 0, 1);
+  auto chunks = world.getChunksAroundPosition(0, 0, 0);
 
   std::cout << "Generating chunk meshes..." << std::endl;
   for (auto chunk : chunks) {
-    chunk->generateMesh();
+    chunk->generateSolidMesh();
   }
 
   auto chunkEndTime = std::chrono::high_resolution_clock::now();

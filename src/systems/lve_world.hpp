@@ -13,7 +13,7 @@ class LveWorld {
 public:
   LveWorld(LveDevice &device) : lveDevice{device} {};
 
-  BlockState getBlock(int32_t x, int32_t y, int32_t z);
+  BlockInfo getBlock(int32_t x, int32_t y, int32_t z);
   std::vector<std::shared_ptr<LveChunk>> getChunksAroundPosition(int32_t x, int32_t z, int32_t radius);
 
 private:

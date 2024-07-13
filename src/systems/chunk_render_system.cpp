@@ -22,7 +22,7 @@ struct SimplePushConstantData {
 };
 
 ChunkRenderSystem::ChunkRenderSystem(LveDevice &device, VkRenderPass renderPass, VkDescriptorSetLayout globalSetLayout)
-    : lveDevice{device}, pool(3) {
+    : lveDevice{device}, pool(6) {
   createPipelineLayout(globalSetLayout);
   createPipeline(renderPass);
 }
@@ -83,14 +83,14 @@ void ChunkRenderSystem::renderChunks(FrameInfo &frameInfo) {
     if (chunk->dirtyMesh) {
       chunk->hasStartedThread = true;
       pool.enqueue([chunk]{
-        chunk->generateMesh();
+        chunk->generateSolidMesh();
       });
 
       continue;
     }
 
-    chunk->model->bind(frameInfo.commandBuffer);
-    chunk->model->draw(frameInfo.commandBuffer);
+    chunk->solidModel->bind(frameInfo.commandBuffer);
+    chunk->solidModel->draw(frameInfo.commandBuffer);
   }
 }
 } // namespace lve
